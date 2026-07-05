@@ -1,37 +1,73 @@
-// controllers/userController.js
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { asyncHandler } from "../middleware/errorMiddleware.js";
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
+import { asyncHandler } from '../middleware/errorMiddleware.js';
 
-const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+// Helper function to sign JSON Web Tokens
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+};
 
+// @desc    Register a new e-commerce user
+// @route   POST /api/users/register
+// @access  Public
 export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(409).json({ message: "User already exists" });
+  // 1. Validation checks
+  if (!name || !email || !password) {
+    res.status(400);
+    throw new Error('Please fill in all input fields');
+  }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, password: hashedPassword });
+  // 2. Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    res.status(400);
+    throw new Error('An account with that email already exists');
+  }
 
-  res.status(201).json({
-    token: signToken(user._id),
-    user: { id: user._id, name: user.name, email: user.email },
-  });
+  // 3. Create user document (Password hashing happens automatically in User model pre-save hook)
+  const user = await User.create({ name, email, password });
+
+  if (user) {
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(400);
+    throw new Error('Invalid user account data received');
+  }
 });
 
-export const loginUser = asyncHandler(async (req, res) => {
+// @desc    Authenticate user & get login token
+// @route   POST /api/users/login
+// @access  Public
+export const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email }).select("+password");
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(401).json({ message: "Invalid credentials" });
+  if (!email || !password) {
+    res.status(400);
+    throw new Error('Please provide both email and password');
+  }
 
-  res.json({
-    token: signToken(user._id),
-    user: { id: user._id, name: user.name, email: user.email },
-  });
+  // Find user by email profile identifier
+  const user = await User.findOne({ email });
+
+  // Use the custom schema method to compare hashed passwords securely
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error('Invalid email or password combination');
+  }
 });

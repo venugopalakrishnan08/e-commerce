@@ -1,6 +1,6 @@
-import React from 'react'
-import './Offers.css'
-import exclusive_image from '../../../../../BACKEND/public/images/Assets/exclusive_image.png';
+import React from 'react';
+import './Offers.css';
+import exclusive_image from '../Assets/exclusive_image.png'; // Removed the double /Assets/
 
 export const Offers = () => {
   return (

@@ -1,27 +1,39 @@
-// middleware/errorMiddleware.js
+// A wrapper to handle exceptions inside async express routes automatically
 export const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
+// Fallback for requests sent to routes that don't exist
 export const notFound = (req, res, next) => {
   res.status(404).json({ message: `Route not found: ${req.originalUrl}` });
 };
 
+// Global centralized Error handling pipeline
 export const errorHandler = (err, req, res, next) => {
+  // Determine structural status codes
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let message = err.message || "An unexpected server error occurred";
+
+  // Handle Mongoose Bad Object ID (CastError)
   if (err.name === "CastError") {
-    return res.status(400).json({ message: "Invalid ID format" });
-  }
-  if (err.name === "ValidationError") {
-    const messages = Object.values(err.errors).map((e) => e.message);
-    return res.status(400).json({ message: messages.join(", ") });
-  }
-  if (err.code === 11000) {
-    return res.status(409).json({ message: "Duplicate field value" });
+    statusCode = 400;
+    message = "Invalid ID format";
   }
 
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
-  console.error(err.stack);
+  // Handle Mongoose Schema Validation Errors
+  if (err.name === "ValidationError") {
+    statusCode = 400;
+    message = Object.values(err.errors).map((e) => e.message).join(", ");
+  }
+
+  // Handle Mongoose Duplicate Key Errors (e.g., trying to register an email that already exists)
+  if (err.code === 11000) {
+    statusCode = 409;
+    message = "Duplicate field value entered. Account already exists.";
+  }
+
+  // Send the final structured JSON response
   res.status(statusCode).json({
-    message: err.message || "Server Error",
-    stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
+    message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 };

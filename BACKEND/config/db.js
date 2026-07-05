@@ -1,19 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ecommerce",
-      {
-        maxPoolSize: 10,
-        serverSelectionTimeoutMS: 5000,
-      }
-    );
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-
-    mongoose.connection.on("error", (err) => {
-      console.error("MongoDB connection error:", err.message);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      maxPoolSize: 10, 
     });
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Database Connection Error: ${error.message}`);
     process.exit(1);

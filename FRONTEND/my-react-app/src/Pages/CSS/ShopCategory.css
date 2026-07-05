@@ -1,39 +1,55 @@
-.shopcategory-banner{
-    display: block;
-    margin: 30px auto;
-    width: 82%;
+.shop-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 10%;
+  margin-bottom: 80px;
 }
-.shopcategory-indexSort{
-    display: flex;
-    margin: 0px 170px;
-    justify-content: space-between;
-    align-items: center;
+
+.shopcategory-banner {
+  display: block;
+  margin: 30px auto;
+  width: 85%;
 }
-.shopcategory-sort{
-    padding: 10px 20px;
-    border-radius: 40px;
-    border: 1px solid #888;
+
+.shopcategory-indexSort {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 85%;
+  margin: 20px 0px;
 }
-.shopcategory-indexSort p span{
-    font-weight: 600;
+
+.shopcategory-sort {
+  padding: 10px 20px;
+  border-radius: 40px;
+  border: 1px solid #888;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
-.shopcategory-products{
-    margin:20px 170px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    row-gap: 80px;
+
+/* ⚠️ THIS DRIVES THE 4-COLUMN HORIZONTAL GRID LAYOUT */
+.shopcategory-products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Generates 4 equal-width grid columns */
+  gap: 40px 30px; 
+  width: 85%;
+  margin: 30px auto;
 }
-.shopcategory-loadmore{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 150px auto;
-    width: 233px;
-    height: 69px;
-    border-radius: 75px;
-    background: #ededed;
-    color: #787878;
-    font-size: 18px;
-    font-weight: 500;
-    cursor: pointer;
+
+.shopcategory-loadmore {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 60px auto;
+  width: 250px;
+  height: 60px;
+  border-radius: 80px;
+  background: #ededed;
+  color: #787878;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
 }
